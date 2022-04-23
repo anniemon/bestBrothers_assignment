@@ -1,0 +1,34 @@
+{
+  "name": "bestbrothers",
+  "version": "1.0.0",
+  "description": "recruiment task for bestbrothers",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "NODE_ENV=test jest --runInBand"
+  },
+  "keywords": [],
+  "author": "Seojung Noh",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.1.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint-config-prettier": "^8.5.0",
+    "jest": "^27.5.1",
+    "nodemon": "^2.0.15",
+    "superagent": "^7.1.2",
+    "supertest": "^6.2.2"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.19.0",
+    "sequelize-cli": "^6.4.1"
+  }
+}

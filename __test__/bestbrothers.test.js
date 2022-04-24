@@ -17,7 +17,7 @@ describe('test the root path', () => {
 
   test('It should response the GET method', async () => {
     const resp = await request(app).get('/');
-    expect(resp.statusCode).toBe(200);
+    expect(resp.statusCode).toBe(404);
   });
 
   afterAll(async () => {

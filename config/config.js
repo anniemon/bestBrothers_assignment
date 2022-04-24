@@ -20,7 +20,7 @@ module.exports = {
   test: {
     username: 'root',
     password: process.env.DATABASE_PASSWORD,
-    database: 'database_test',
+    database: process.env.DATABASE_NAME_TEST,
     host: '127.0.0.1',
     dialect: 'mysql',
     define: {

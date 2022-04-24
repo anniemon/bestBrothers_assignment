@@ -1,5 +1,10 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
+
+app.use(cors());
+app.use(express.json());
+
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -18,19 +23,8 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// *                respond with users who are not the same sex as the requested user (ex. male -> female and vice versa)
-// *                exclude to whom the requested user has already appealed
-// *                exclude who is receiving more than 5 appeals
-// *                request:
-// *                maxAge(required), max: +10 min: the same as the requested user
-// *                minAge(required), max: the same as the requested user, min: -10
-// *                hobby(optional), allow multiple selection(OR)
-// *                response:
-// *                member identifier
-// *                nickname
-// *                sex
-// *                age
-// *                hobby
+const userRouter = require('./router/userRouter');
+const appealRouter = require('./router/appealRouter');
 // Routes
 /**
  * @swagger
@@ -65,9 +59,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *                - exclude to whom the requested user has already appealed
  *                - exclude who is receiving more than 5 appeals
  */
-app.get('/', (req, res) => {
-  res.status(200).send('hi');
-});
+app.use('/user', userRouter);
 
 /**
  * @swagger
@@ -86,8 +78,15 @@ app.get('/', (req, res) => {
  *      '201':
  *        description: Successfully created user
  */
-app.put('/customer', (req, res) => {
-  res.status(200).send('Successfully updated customer');
+app.use('/appeal', appealRouter);
+
+app.use((error, req, res, next) => {
+  console.error(error);
+  res.status(500).send('Sorry, try later!');
+});
+
+app.use((req, res, next) => {
+  res.status(404).send('not found');
 });
 
 module.exports = app;

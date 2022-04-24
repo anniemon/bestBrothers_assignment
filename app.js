@@ -28,7 +28,7 @@ const appealRouter = require('./router/appealRouter');
 // Routes
 /**
  * @swagger
- * /users:
+ * /user:
  *  get:
  *    description: Use to return matching users
  *    parameters:
@@ -63,7 +63,7 @@ app.use('/user', userRouter);
 
 /**
  * @swagger
- * /customers:
+ * /appeal:
  *    put:
  *      description: Use to return all customers
  *    parameters:

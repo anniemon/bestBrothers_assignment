@@ -1,7 +1,7 @@
-const { getMatchedUser } = require('../controller/userController');
+const { getUser } = require('../controller/userController');
 const express = require('express');
 const router = express.Router();
 
-router.get('/', getMatchedUser);
+router.get('/', getUser);
 
 module.exports = router;

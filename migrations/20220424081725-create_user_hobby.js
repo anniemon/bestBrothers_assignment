@@ -12,6 +12,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       hobby_id: {
+        allowNull: true,
         type: Sequelize.INTEGER,
       },
       created_at: {

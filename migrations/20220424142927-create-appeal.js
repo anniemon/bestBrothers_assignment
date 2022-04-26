@@ -19,6 +19,7 @@ module.exports = {
       },
       response_date: {
         type: Sequelize.DATE,
+        allowNull: true,
       },
       is_responded: {
         type: Sequelize.BOOLEAN,

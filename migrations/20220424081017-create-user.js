@@ -20,7 +20,10 @@ module.exports = {
         type: Sequelize.STRING,
       },
       appeal_point: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
+      },
+      age: {
+        type: Sequelize.INTEGER,
       },
       created_at: {
         allowNull: false,

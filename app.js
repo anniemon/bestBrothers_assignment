@@ -80,6 +80,10 @@ app.use('/user', userRouter);
  */
 app.use('/appeal', appealRouter);
 
+app.get('/', (req, res) => {
+  res.status(200).send('Welcome!');
+});
+
 app.use((error, req, res, next) => {
   console.error(error);
   res.status(500).send('Sorry, try later!');

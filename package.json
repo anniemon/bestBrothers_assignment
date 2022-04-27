@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "NODE_ENV=test jest"
+    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "Seojung Noh",
@@ -15,7 +15,8 @@
     "babel-eslint": "^10.1.0",
     "babel-preset-env": "^1.7.0",
     "eslint-config-prettier": "^8.5.0",
-    "jest": "^27.5.1",
+    "jest": "^26.4.2",
+    "node-mocks-http": "^1.11.0",
     "nodemon": "^2.0.15",
     "superagent": "^7.1.2",
     "supertest": "^6.2.2"

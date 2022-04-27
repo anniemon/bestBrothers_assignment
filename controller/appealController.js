@@ -1,19 +1,19 @@
-const { appeal } = require('../models/appeal');
-const { user } = require('../models/user');
+const { appeal } = require('../models');
+const { user } = require('../models');
 
 module.exports = {
   postAppeal: async (req, res) => {
     const appeal_date = new Date().toISOString();
     const user_identifier = req.headers['X-user-ID'];
     const receiver_id = req.body['receiver_id'];
+    const matchedUser = await user.findOne({ where: { identifier: user_identifier } });
 
-    const matchedUser = await user.findOne({ identifier: user_identifier });
+    console.log(matchedUser, '?cmxkcmvxkcjv');
+
     if (matchedUser.appeal_point === 0) {
       return res.status(400).send('어필 요청이 불가합니다.');
     } else {
-      const appeals = await appeal.findAll({ where: { receiver_id } });
-      const pendingAppeals = await appeals.findAll({ where: { is_responded: false } });
-
+      const pendingAppeals = await appeal.findAll({ where: { is_responded: false, receiver_id } });
       if (pendingAppeals && pendingAppeals.length >= 5) {
         return res.status(400).send('어필 요청이 불가합니다.');
       }

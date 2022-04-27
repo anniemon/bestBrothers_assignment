@@ -9,18 +9,28 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       movie: {
+        defaultValue: null,
+        allowNull: true,
         type: Sequelize.BOOLEAN,
       },
       music: {
+        defaultValue: null,
+        allowNull: true,
         type: Sequelize.BOOLEAN,
       },
       reading: {
+        defaultValue: null,
+        allowNull: true,
         type: Sequelize.BOOLEAN,
       },
       exercise: {
+        defaultValue: null,
+        allowNull: true,
         type: Sequelize.BOOLEAN,
       },
       travel: {
+        defaultValue: null,
+        allowNull: true,
         type: Sequelize.BOOLEAN,
       },
       created_at: {

@@ -1,7 +1,5 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class hobby extends Model {
     /**
@@ -13,16 +11,19 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  hobby.init({
-    movie: DataTypes.BOOLEAN,
-    music: DataTypes.BOOLEAN,
-    reading: DataTypes.BOOLEAN,
-    exercise: DataTypes.BOOLEAN,
-    travel: DataTypes.BOOLEAN
-  }, {
-    sequelize,
-    modelName: 'hobby',
-    underscored: true,
-  });
+  hobby.init(
+    {
+      movie: DataTypes.BOOLEAN,
+      music: DataTypes.BOOLEAN,
+      reading: DataTypes.BOOLEAN,
+      exercise: DataTypes.BOOLEAN,
+      travel: DataTypes.BOOLEAN,
+    },
+    {
+      sequelize,
+      modelName: 'hobby',
+      underscored: true,
+    }
+  );
   return hobby;
 };

@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.get('/', getPendingAppeals);
 router.post('/', postAppeal);
-router.post('/respond', respondAppeal);
+router.post('/response', respondAppeal);
 
 module.exports = router;

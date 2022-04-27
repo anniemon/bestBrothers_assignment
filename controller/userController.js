@@ -1,52 +1,50 @@
-const { user } = require('../models/user');
-const { appeal } = require('../models/appeal');
+const { user } = require('../models');
+const { appeal } = require('../models');
+const { hobby } = require('../models');
+const { user_hobby } = require('../models');
+const sequelize = require('sequelize');
+const Op = sequelize.Op;
 
 module.exports = {
-  getUser: async (req, res) => {
+  searchUser: async (req, res) => {
     const user_identifier = req.headers['X-user-ID'];
-    const matchedUser = user.findOne({ where: { identifier: user_identifier } });
+    const counterpartSex = matchedUser.sex === 'male' ? 'female' : 'male';
 
-    if (matchedUser.sex == 'female') {
-      const maleUsers = await user.findAll({ where: { sex: 'male' } });
+    const maxAge = req.query.maxAge;
+    const minAge = req.query.minAge;
+    const reqHobby = req.query.hobby;
+    //* https://example.com/hobby?hobby=movie&hobby=music&hobby=travel&hobby=reading
+
+    if (!maxAge || !minAge) {
+      return res.status(400).send({ message: '입력 정보가 불충분합니다' });
+    } else {
+      //TODO: 나이(o), 취미, 성별(o), 어필 이력x(o), 대기 어필 5개 미만(o)
+      const counterpartSexUsers = await user.findAll({ where: { sex: counterpartSex } });
+      const ageFilteredUsers = await counterpartSexUsers.findAll({ where: { [Op.between]: [minAge, maxAge] } });
+
       const appeals = await appeal.findAll({ where: { appealer_id: user_identifier } });
+      const receiverIds = appeals.map(appeal => appeal.receiver_id);
+      const notAppealedUsers = ageFilteredUsers.filter(user => !receiverIds.includes(user.identifier));
+      let pendingFilteredUsers;
 
-      if (appeals) {
-        const receivedUserIds = appeals.map(appeal => appeal.receiver_id);
-        const notAppealedMaleUsers = maleUsers.filter(maleUser => !receivedUserIds.includes(maleUser.identifier));
-        const pendingAppeals = await appeals.findAll({ where: { is_responded: false } });
-
+      for (let i = 0; i < notAppealedUsers.length; i++) {
+        const pendingAppeals = await appeal.findAll({
+          where: { receiver_id: notAppealedUsers[i].identifier, is_responded: false },
+        });
         if (pendingAppeals && pendingAppeals.length >= 5) {
-          const filteredMaleUsers = notAppealedMaleUsers.filter(
-            maleUser => !pendingAppeals.map(appeal => appeal.receiver_id).includes(maleUser.identifier)
-          );
-          res.status(200).json({ filteredMaleUsers });
-        } else {
-          res.status(200).json({ notAppealedMaleUsers });
+          pendingFilteredUsers = notAppealedUsers.filter(user => user.identifier !== notAppealedUsers[i].identifier);
         }
-      } else {
-        res.status(200).json({ maleUsers });
       }
-    } else if (sex == 'male') {
-      const femaleUsers = await user.findAll({ where: { sex: 'female' } });
-      const appeals = await appeal.findAll({ where: { appealer_id: user_identifier } });
-
-      if (appeals) {
-        const receivedUserIds = appeals.map(appeal => appeal.receiver_id);
-        const notAppealedFemaleUsers = femaleUsers.filter(
-          femaleUser => !receivedUserIds.includes(femaleUser.identifier)
-        );
-        const pendingAppeals = await appeals.findAll({ where: { is_responded: false } });
-
-        if (pendingAppeals && pendingAppeals.length >= 5) {
-          const filteredFemaleUsers = notAppealedFemaleUsers.filter(
-            femaleUser => !pendingAppeals.map(appeal => appeal.receiver_id).includes(femaleUser.identifier)
-          );
-          res.status(200).json({ filteredFemaleUsers });
-        } else {
-          res.status(200).json({ notAppealedFemaleUsers });
-        }
+      if (!reqHobby) {
+        return res.status(200).json({ pendingFilteredUsers });
       } else {
-        res.status(200).json({ femaleUsers });
+        let hobbyFilteredUsers = [];
+        //TODO: 취미가 있으면 취미 하나라도 맞는 유저를 찾아서 위에서 필터링한 것에서 재필터링
+        //* pendingFilteredUsers 돌면서 그 아이디로 user_hobby찾고, hobby조인해서 맞으면 남기고 아니면 제거...하는 식으로 짜보기
+        //* req.query.hobby => [movie, music, reading];
+        const hobbies = req.query.hobby;
+
+        res.status(200).json({ hobbyFilteredUsers });
       }
     }
   },

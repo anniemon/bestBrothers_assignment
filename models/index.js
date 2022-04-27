@@ -33,8 +33,8 @@ Object.keys(db).forEach(modelName => {
 const { user, appeal, hobby, user_hobby } = sequelize.models;
 user.belongsToMany(hobby, { foreignKey: 'hobby_id', through: user_hobby });
 hobby.belongsToMany(user, { foreignKey: 'user_identifier', through: user_hobby });
-user.belongsToMany(user, { as: 'appealer_id', through: appeal });
-user.belongsToMany(user, { as: 'receiver_id', through: appeal });
+user.belongsToMany(user, { as: 'appealer_id', foreignKey: 'appealer_id', through: appeal });
+user.belongsToMany(user, { as: 'receiver_id', foreignKey: 'receiver_id', through: appeal });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

@@ -4,6 +4,7 @@ const cors = require('cors');
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -64,19 +65,65 @@ app.use('/user', userRouter);
 /**
  * @swagger
  * /appeal:
- *    put:
- *      description: Use to return all customers
+ *    post:
+ *      description: Use to create appeal request
  *    parameters:
- *      - name: customer
- *        in: query
- *        description: Name of our customer
- *        required: false
+ *      - name: X-user-ID
+ *        in: headers
+ *        description: identifier of requested user
+ *        required: true
+ *        schema:
+ *          type: string
+ *          format: string
+ *      - name: receiver_id
+ *        in: req.body
+ *        description: identifier of receiving user
+ *        required: true
  *        schema:
  *          type: string
  *          format: string
  *    responses:
  *      '201':
- *        description: Successfully created user
+ *        description: Successfully created appeal
+ */
+app.use('/appeal', appealRouter);
+
+/**
+ * @swagger
+ * /appeal:
+ *   get:
+ *      description: Use to get pending appeals
+ *   parameters:
+ *    responses:
+ *      '200':
+ *        description: list of appeals including appeal id, appealer_id, appeal_date
+ */
+app.use('/appeal', appealRouter);
+
+/**
+ * @swagger
+ * /appeal/response:
+ *    post:
+ *      description: Use to respond appeals
+ *    parameters:
+ *      - name: appeal id
+ *        in: req.body
+ *        description: id of appeal
+ *        required: true
+ *        schema:
+ *          type: number
+ *          format: number
+ *      - name: appeal response
+ *        in: req.body
+ *        description: true or false
+ *        required: true
+ *        schema:
+ *          type: boolean
+ *          format: boolean
+ *    responses:
+ *      '200':
+ *        description: update appeal info via setting respond_date, is_responded
+ *                     responses includes appeal id, is_responded, response_date
  */
 app.use('/appeal', appealRouter);
 

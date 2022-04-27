@@ -24,6 +24,14 @@ module.exports = {
       is_responded: {
         type: Sequelize.BOOLEAN,
       },
+      created_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      updated_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {

@@ -4,11 +4,9 @@ const { user } = require('../models');
 module.exports = {
   postAppeal: async (req, res) => {
     const appeal_date = new Date().toISOString();
-    const user_identifier = req.headers['X-user-ID'];
+    const user_identifier = req.headers['x-user-id'];
     const receiver_id = req.body['receiver_id'];
     const matchedUser = await user.findOne({ where: { identifier: user_identifier } });
-
-    console.log(matchedUser, '?cmxkcmvxkcjv');
 
     if (matchedUser.appeal_point === 0) {
       return res.status(400).send('어필 요청이 불가합니다.');
@@ -22,16 +20,17 @@ module.exports = {
       if (isAppealed) {
         return res.status(400).send('어필 요청이 불가합니다.');
       }
+
       //TODO: 메일 보내기
       const newAppeal = await appeal.create({
+        id: req.body.id,
         appealer_id: user_identifier,
         receiver_id: receiver_id,
         appeal_date: appeal_date,
         is_responded: false,
         response_date: null,
       });
-      await matchedUser.decrement('appeal_point', { by: 1 });
-
+      await user.decrement('appeal_point', { by: 1, where: { identifier: user_identifier } });
       return res.status(201).json({ appeal_id: newAppeal.id, remaining_appeal_point: matchedUser.appeal_point });
     }
   },

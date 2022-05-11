@@ -8,17 +8,20 @@ module.exports = {
     const receiver_id = req.body['receiver_id'];
     const matchedUser = await user.findOne({ where: { identifier: user_identifier } });
 
+    if (!user_identifier || !receiver_id) {
+      return res.status(401).send('입력 정보가 불충분합니다');
+    }
     if (matchedUser.appeal_point === 0) {
-      return res.status(400).send('어필 요청이 불가합니다.');
+      return res.status(400).send('어필 포인트가 없습니다.');
     } else {
       const pendingAppeals = await appeal.findAll({ where: { is_responded: false, receiver_id } });
       if (pendingAppeals && pendingAppeals.length >= 5) {
-        return res.status(400).send('어필 요청이 불가합니다.');
+        return res.status(400).send('대기 중인 어필이 5개가 넘습니다.');
       }
 
       const isAppealed = await appeal.findOne({ where: { appealer_id: user_identifier, receiver_id: receiver_id } });
       if (isAppealed) {
-        return res.status(400).send('어필 요청이 불가합니다.');
+        return res.status(400).send('이미 어필한 사용자입니다.');
       }
 
       //TODO: 메일 보내기

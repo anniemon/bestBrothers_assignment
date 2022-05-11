@@ -18,7 +18,7 @@ module.exports = {
           updated_at: '2021-12-01 10:50:36',
         },
         {
-          id: '1',
+          id: '2',
           identifier: 'user2',
           nickname: 'sam',
           email: 'sorry@gmail.com',
@@ -30,7 +30,7 @@ module.exports = {
           updated_at: '2021-12-01 10:50:36',
         },
         {
-          id: '1',
+          id: '3',
           identifier: 'user3',
           nickname: 'john',
           email: 'hi@gmail.com',

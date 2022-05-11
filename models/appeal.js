@@ -1,7 +1,7 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class appeal extends Model {
+  class Appeal extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,8 +11,12 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  appeal.init(
+  Appeal.init(
     {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+      },
       appealer_id: DataTypes.STRING,
       receiver_id: DataTypes.STRING,
       appeal_date: DataTypes.DATE,
@@ -25,5 +29,5 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
     }
   );
-  return appeal;
+  return Appeal;
 };

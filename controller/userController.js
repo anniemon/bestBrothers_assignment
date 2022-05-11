@@ -1,51 +1,101 @@
+const models = require('../models').sequelize.models;
 const { user } = require('../models');
 const { appeal } = require('../models');
 const { hobby } = require('../models');
 const { user_hobby } = require('../models');
 const sequelize = require('sequelize');
+const { HOBBIES, GENDER_CODES } = require('../constants');
 const Op = sequelize.Op;
 
 module.exports = {
   searchUser: async (req, res) => {
-    const user_identifier = req.headers['X-user-ID'];
-    const counterpartSex = matchedUser.sex === 'male' ? 'female' : 'male';
+    const userIdentifier = req.headers['X-User-ID'];
 
-    const maxAge = req.query.maxAge;
-    const minAge = req.query.minAge;
-    const reqHobby = req.query.hobby;
-    //* https://example.com/hobby?hobby=movie&hobby=music&hobby=travel&hobby=reading
-
-    if (!maxAge || !minAge) {
-      return res.status(400).send({ message: '입력 정보가 불충분합니다' });
-    } else {
-      //TODO: 나이(o), 취미, 성별(o), 어필 이력x(o), 대기 어필 5개 미만(o)
-      const counterpartSexUsers = await user.findAll({ where: { sex: counterpartSex } });
-      const ageFilteredUsers = await counterpartSexUsers.findAll({ where: { [Op.between]: [minAge, maxAge] } });
-
-      const appeals = await appeal.findAll({ where: { appealer_id: user_identifier } });
-      const receiverIds = appeals.map(appeal => appeal.receiver_id);
-      const notAppealedUsers = ageFilteredUsers.filter(user => !receiverIds.includes(user.identifier));
-      let pendingFilteredUsers;
-
-      for (let i = 0; i < notAppealedUsers.length; i++) {
-        const pendingAppeals = await appeal.findAll({
-          where: { receiver_id: notAppealedUsers[i].identifier, is_responded: false },
-        });
-        if (pendingAppeals && pendingAppeals.length >= 5) {
-          pendingFilteredUsers = notAppealedUsers.filter(user => user.identifier !== notAppealedUsers[i].identifier);
-        }
-      }
-      if (!reqHobby) {
-        return res.status(200).json({ pendingFilteredUsers });
-      } else {
-        let hobbyFilteredUsers = [];
-        //TODO: 취미가 있으면 취미 하나라도 맞는 유저를 찾아서 위에서 필터링한 것에서 재필터링
-        //* pendingFilteredUsers 돌면서 그 아이디로 user_hobby찾고, hobby조인해서 맞으면 남기고 아니면 제거...하는 식으로 짜보기
-        //* req.query.hobby => [movie, music, reading];
-        const hobbies = req.query.hobby;
-
-        res.status(200).json({ hobbyFilteredUsers });
-      }
+    // verify X-User-ID header
+    if (!userIdentifier) {
+      return res.status(401).send('Unauthorized user');
     }
+
+    // verify user
+    const me = await user.findOne({ where: { identifier: userIdentifier } });
+
+    if (!userIdentifier) {
+      return res.status(400).send('User not exist');
+    }
+
+    // verify params
+    const maxAge = parseInt(req.query.maxAge, 10);
+    const minAge = parseInt(req.query.minAge, 10);
+    const hobbyParam = req.query.hobby;
+    const hobbies = hobbyParam ? (Array.isArray(hobbyParam) ? hobbyParam : [hobbyParam]) : [];
+
+    if (maxAge > me.age + 10 || minAge < me.age - 10) {
+      return res.status(400).send('Invalid age');
+    }
+
+    const hobbyCodes = Object.keys(HOBBIES);
+
+    if (hobbies.length > hobbyCodes.length || hobbies.some(hobby => !hobbyCodes.includes(hobby))) {
+      return res.status(400).send('Invalid hobby');
+    }
+
+    // build query
+    const oppisitGender = {
+      male: GENDER_CODES.female,
+      female: GENDER_CODES.male,
+    };
+
+    const whereGender = {
+      sex: oppisitGender[me.gender],
+    };
+
+    const whereAge = {
+      [Op.between]: [minAge, maxAge],
+    };
+
+    const whereHobby = {
+      [Op.in]: hobbies,
+    };
+
+    const foundUsers = await models.user.findAll({
+      attributes: {
+        include: [
+          'identifier',
+          'nickname',
+          'sex',
+          'birth_date',
+          [sequelize.literal(`sum( if( appeal.appealer_id = '${me.identifier}', 1, 0))`), 'appealed_by_me'],
+          [sequelize.literal('sum( if( appeal.is_responded = false, 1, 0))'), 'pending_appeals'],
+        ],
+      },
+      include: [
+        {
+          attributes: ['name'],
+          mode: models.hobby,
+          as: 'hobby',
+        },
+        {
+          attributes: ['appealer_id', 'is_responded'],
+          mode: models.appeal,
+          as: 'appeal',
+        },
+      ],
+      where: {
+        ...whereGender,
+        ...whereAge,
+        ...whereHobby,
+      },
+      group: ['identifier'],
+      having: {
+        [Op.eq]: ['appealed_by_me', 0],
+        [Op.lt]: ['pending_appeals', 5],
+      },
+      offset: 0,
+      limit: 10,
+    });
+
+    res.status(200).json({
+      foundUsers,
+    });
   },
 };

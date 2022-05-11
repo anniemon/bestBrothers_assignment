@@ -1,7 +1,8 @@
 'use strict';
 const { Model } = require('sequelize');
+const { HOBBIES } = require('../constants');
 module.exports = (sequelize, DataTypes) => {
-  class hobby extends Model {
+  class Hobby extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,13 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  hobby.init(
+  Hobby.init(
     {
-      movie: DataTypes.BOOLEAN,
-      music: DataTypes.BOOLEAN,
-      reading: DataTypes.BOOLEAN,
-      exercise: DataTypes.BOOLEAN,
-      travel: DataTypes.BOOLEAN,
+      code: DataTypes.ENUM(Object.keys(HOBBIES)),
+      name: DataTypes.STRING,
     },
     {
       sequelize,
@@ -25,5 +23,5 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
     }
   );
-  return hobby;
+  return Hobby;
 };

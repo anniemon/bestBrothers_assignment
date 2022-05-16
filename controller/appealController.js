@@ -6,11 +6,12 @@ module.exports = {
     const appeal_date = new Date().toISOString();
     const user_identifier = req.headers['x-user-id'];
     const receiver_id = req.body['receiver_id'];
-    const matchedUser = await user.findOne({ where: { identifier: user_identifier } });
-
     if (!user_identifier || !receiver_id) {
       return res.status(401).send('입력 정보가 불충분합니다');
     }
+
+    const matchedUser = await user.findOne({ where: { identifier: user_identifier } });
+
     if (matchedUser.appeal_point === 0) {
       return res.status(400).send('어필 포인트가 없습니다.');
     } else {

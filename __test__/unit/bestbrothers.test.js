@@ -1,7 +1,6 @@
 const request = require('supertest');
 
 const app = require('../../app');
-const { sequelize } = require('../../models');
 
 const appealController = require('../../controller/appealController');
 const { appeal } = require('../../models');
@@ -35,12 +34,11 @@ describe('test the root path', () => {
 
 describe('Post Appeal', () => {
   beforeEach(() => {
-    req.body['receiver_id'] = 'user1';
-    req.headers['x-user-id'] = 'user2';
+    req.body['receiver_id'] = 'user2';
+    req.headers['x-user-id'] = 'user1';
     req.body.id = newAppeal.id;
   });
 
-  //* 어필 식별자, 어필 받는 회원 식별자, 하는 회원 식별자, 어필 일시, 응답 수락/거절, 응답 일시
   it('should have a postAppeal function', () => {
     expect(typeof appealController.postAppeal).toBe('function');
   });
@@ -52,5 +50,13 @@ describe('Post Appeal', () => {
     expect(res._getData()).toBe(
       JSON.stringify({ appeal_id: newAppeal.id, remaining_appeal_point: matchedUser.appeal_point })
     );
+  });
+
+  it("should return 400 if requested users's appeal_point is 0", async () => {
+    const userWith0AppealPoint = { ...matchedUser, appeal_point: 0 };
+    user.findOne.mockReturnValue(userWith0AppealPoint);
+    await appealController.postAppeal(req, res, next);
+    expect(res.statusCode).toBe(400);
+    expect(res._getData()).toBe('어필 포인트가 없습니다.');
   });
 });

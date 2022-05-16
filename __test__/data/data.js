@@ -1,5 +1,6 @@
 module.exports = {
   matchedUser: {
+    id: '1',
     identifier: 'user1',
     nickname: 'john',
     email: 'hello@gmail.com',

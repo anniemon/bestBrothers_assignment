@@ -46,6 +46,7 @@ describe('Post Appeal', () => {
   it('should return appeal_id and remaining appeal_point', async () => {
     user.findOne.mockReturnValue(matchedUser);
     appeal.create.mockReturnValue(newAppeal);
+    user.decrement.mockReturnValue({ ...matchedUser, appeal_point: matchedUser.appeal_point - 1 });
     await appealController.postAppeal(req, res, next);
     expect(res._getData()).toBe(
       JSON.stringify({ appeal_id: newAppeal.id, remaining_appeal_point: matchedUser.appeal_point })

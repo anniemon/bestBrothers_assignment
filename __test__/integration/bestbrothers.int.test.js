@@ -3,9 +3,6 @@ const app = require('../../server');
 const { appeal, user } = require('../../models');
 const { matchedUser, newAppeal } = require('../data/data');
 
-appeal.findOne = jest.fn();
-user.decrement = jest.fn();
-
 it('POST /appeal', async () => {
   //* 이 요청 보내기 전에 appeal을 없애준다
   await appeal.destroy({ where: { appealer_id: 'user1', receiver_id: 'user2' } });
@@ -16,7 +13,7 @@ it('POST /appeal', async () => {
     .type('application/json')
     .set('x-user-id', 'user1');
 
-  await user.decrement('appeal_point', { by: 1, where: { identifier: 'user1' } });
+  await user.increment('appeal_point', { by: 1, where: { identifier: 'user1' } });
 
   expect(response.statusCode).toBe(201);
   expect(response.body.appeal_id).toBe(newAppeal.id);

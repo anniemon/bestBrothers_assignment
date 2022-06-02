@@ -59,4 +59,20 @@ describe('Post Appeal', () => {
     expect(res.statusCode).toBe(400);
     expect(res._getData()).toBe('어필 포인트가 없습니다.');
   });
+
+  it('should return 400 if pending appeals are equal or more than 5', async () => {
+    user.findOne.mockReturnValue(matchedUser);
+    appeal.findAll.mockReturnValue([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }]);
+    await appealController.postAppeal(req, res, next);
+    expect(res.statusCode).toBe(400);
+    expect(res._getData()).toBe('대기 중인 어필이 5개가 넘습니다.');
+    appeal.findAll.mockReturnValue([]);
+  });
+
+  it('should return 400 if already appealed', async () => {
+    appeal.findOne.mockReturnValue(newAppeal);
+    await appealController.postAppeal(req, res, next);
+    expect(res.statusCode).toBe(400);
+    expect(res._getData()).toBe('이미 어필한 사용자입니다.');
+  });
 });

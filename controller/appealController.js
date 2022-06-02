@@ -6,36 +6,41 @@ module.exports = {
     const appeal_date = new Date().toISOString();
     const user_identifier = req.headers['x-user-id'];
     const receiver_id = req.body['receiver_id'];
+
     if (!user_identifier || !receiver_id) {
       return res.status(401).send('입력 정보가 불충분합니다');
     }
 
-    const matchedUser = await user.findOne({ where: { identifier: user_identifier } });
+    try {
+      const matchedUser = await user.findOne({ where: { identifier: user_identifier } });
 
-    if (matchedUser.appeal_point === 0) {
-      return res.status(400).send('어필 포인트가 없습니다.');
-    } else {
-      const pendingAppeals = await appeal.findAll({ where: { is_responded: false, receiver_id } });
-      if (pendingAppeals && pendingAppeals.length >= 5) {
-        return res.status(400).send('대기 중인 어필이 5개가 넘습니다.');
+      if (matchedUser.appeal_point === 0) {
+        return res.status(400).send('어필 포인트가 없습니다.');
+      } else {
+        const pendingAppeals = await appeal.findAll({ where: { is_responded: false, receiver_id } });
+        if (pendingAppeals && pendingAppeals.length >= 5) {
+          return res.status(400).send('대기 중인 어필이 5개가 넘습니다.');
+        }
+
+        const isAppealed = await appeal.findOne({ where: { appealer_id: user_identifier, receiver_id: receiver_id } });
+        if (isAppealed) {
+          return res.status(400).send('이미 어필한 사용자입니다.');
+        }
+
+        //TODO: 메일 보내기
+        const newAppeal = await appeal.create({
+          id: req.body.id,
+          appealer_id: user_identifier,
+          receiver_id: receiver_id,
+          appeal_date: appeal_date,
+          is_responded: false,
+          response_date: null,
+        });
+        await user.decrement('appeal_point', { by: 1, where: { identifier: user_identifier } });
+        return res.status(201).json({ appeal_id: newAppeal.id, remaining_appeal_point: matchedUser.appeal_point });
       }
-
-      const isAppealed = await appeal.findOne({ where: { appealer_id: user_identifier, receiver_id: receiver_id } });
-      if (isAppealed) {
-        return res.status(400).send('이미 어필한 사용자입니다.');
-      }
-
-      //TODO: 메일 보내기
-      const newAppeal = await appeal.create({
-        id: req.body.id,
-        appealer_id: user_identifier,
-        receiver_id: receiver_id,
-        appeal_date: appeal_date,
-        is_responded: false,
-        response_date: null,
-      });
-      await user.decrement('appeal_point', { by: 1, where: { identifier: user_identifier } });
-      return res.status(201).json({ appeal_id: newAppeal.id, remaining_appeal_point: matchedUser.appeal_point });
+    } catch (err) {
+      console.error(err);
     }
   },
   getPendingAppeals: async (req, res) => {

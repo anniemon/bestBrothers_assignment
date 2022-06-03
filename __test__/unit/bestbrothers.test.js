@@ -7,7 +7,7 @@ const { appeal } = require('../../models');
 const userController = require('../../controller/userController');
 const { user } = require('../../models');
 const httpMocks = require('node-mocks-http');
-const { matchedUser, newAppeal } = require('../data/data');
+const { matchedUser, newAppeal, respondedAppeal } = require('../data/data');
 
 appeal.create = jest.fn();
 appeal.findOne = jest.fn();
@@ -75,5 +75,27 @@ describe('Post Appeal', () => {
     await appealController.postAppeal(req, res, next);
     expect(res.statusCode).toBe(400);
     expect(res._getData()).toBe('이미 어필한 사용자입니다.');
+  });
+});
+
+describe('Get Pending Appeals', () => {
+  beforeEach(() => {
+    req.headers['x-user-id'] = 'user1';
+  });
+
+  it('should return pending appeals', async () => {
+    appeal.findAll.mockReturnValue(newAppeal);
+    await appealController.getPendingAppeals(req, res, next);
+    expect(res.statusCode).toBe(200);
+    expect(res._getData()).toStrictEqual(JSON.stringify({ pendingAppeals: newAppeal }));
+    expect(res._getData()).not.toContain(JSON.stringify(respondedAppeal));
+  });
+
+  it('should return 401 with no user_identifier', async () => {
+    req.headers['x-user-id'] = '';
+    appeal.findAll.mockReturnValue(newAppeal);
+    await appealController.getPendingAppeals(req, res, next);
+    expect(res.statusCode).toBe(401);
+    expect(res._getData()).toBe('입력 정보가 불충분합니다');
   });
 });

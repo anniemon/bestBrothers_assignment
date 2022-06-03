@@ -44,12 +44,19 @@ module.exports = {
     }
   },
   getPendingAppeals: async (req, res) => {
-    const user_identifier = req.headers['X-user-ID'];
-    const pendingAppeals = await appeals.findAll({
-      where: { receiver_id: user_identifier, is_responded: false },
-      attributes: ['id', 'appealer_id', 'appeal_date'],
-    });
-    return res.status(200).json({ pendingAppeals });
+    const user_identifier = req.headers['x-user-id'];
+    if (!user_identifier) {
+      return res.status(401).send('입력 정보가 불충분합니다');
+    }
+    try {
+      const pendingAppeals = await appeal.findAll({
+        where: { receiver_id: user_identifier, is_responded: false },
+        attributes: ['id', 'appealer_id', 'appeal_date'],
+      });
+      return res.status(200).json({ pendingAppeals });
+    } catch (err) {
+      console.error(err);
+    }
   },
   respondAppeal: async (req, res) => {
     //TODO: 어필 요청한 회원에게 알림 메일 발송
